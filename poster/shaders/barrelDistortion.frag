@@ -2,8 +2,10 @@
 
 uniform vec2 imageSize;
 uniform float power;
+uniform int type;
 
 // Credit: https://prideout.net/barrel-distortion
+// Modified by Source Kitty to add different types
 vec2 Distort(vec2 p)
 {
     float theta  = atan(p.y, p.x);
@@ -18,13 +20,28 @@ vec4 effect(vec4 color, Image tex, vec2 tc, vec2 sc) {
     vec2 xy = 2.0 * tc - 1.0;
     vec2 uv;
     float d = length(xy);
-    if (d < 1.0)
-    {
-        uv = Distort(xy);
+    if (type == 1){
+        if (d < 1.0)
+        {
+            uv = Distort(xy);
+        }
+        else
+        {
+            uv = tc;
+        }
     }
-    else
-    {
-        uv = tc;
+    else if (type == 2){
+        if (d > 1.0)
+        {
+            uv = Distort(xy);
+        }
+        else
+        {
+            uv = tc;
+        }
+    }
+    else{
+        uv = Distort(xy);
     }
     return Texel(tex, uv);
 }
