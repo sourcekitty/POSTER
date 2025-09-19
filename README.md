@@ -4,11 +4,11 @@ POSTER is a post processing library for Löve. It comes with a suit of built in 
 # Demo
 The demo is just snake. But with shaders.
 Here's without shaders
-![noshaders](https://github.com/veethree/POSTER/blob/main/SnakeDemoNoShaders.gif)
+![noshaders](https://github.com/sourcekitty/POSTER/blob/main/SnakeDemoNoShaders.gif)
 
 And here's the same with shaders
 
-![shaders](https://github.com/veethree/POSTER/blob/main/SnakeDemoShaders.gif)
+![shaders](https://github.com/sourcekitty/POSTER/blob/main/SnakeDemoShaders.gif)
 
 I think we can all agree shaders make it far better.
 
