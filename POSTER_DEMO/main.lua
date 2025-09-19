@@ -1,30 +1,3 @@
--- Snake demo for POSTER
--- Version: v1.0
--- A bare bones snake clone that serves as a demo for POSTER.
-
--- MIT License
--- 
--- Copyright (c) 2021 Pawel Þorkelsson
--- 
--- Permission is hereby granted, free of charge, to any person obtaining a copy
--- of this software and associated documentation files (the "Software"), to deal
--- in the Software without restriction, including without limitation the rights
--- to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
--- copies of the Software, and to permit persons to whom the Software is
--- furnished to do so, subject to the following conditions:
-
--- The above copyright notice and this permission notice shall be included in all
--- copies or substantial portions of the Software.
-
--- THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
--- IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
--- FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
--- AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
--- LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
--- OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
--- SOFTWARE.
-
-
 -- GLOBALS
 lg = love.graphics
 fs = love.filesystem
@@ -46,7 +19,10 @@ colors = {
     {0.9, 0.2, 0.2, 1} -- red
 }
 
-useShaders = true -- Used to toggle shaders
+function love.resize(w, h)
+    canvas:resize() --Name this to your canvas
+    post:addSetting("chromaticAberrationRadius", "position", {lg.getWidth() / 2, lg.getHeight() / 2}) --I would make a function that reloads all of it
+end
 
 function love.load()
     -- Loading the various classes
@@ -74,6 +50,7 @@ function love.load()
 
     -- Löve setup
     lg.setBackgroundColor(0.08, 0.08, 0.08)
+    useShaders = true
 
     -- POSTER Setup
     canvas = poster.new() -- The main canvas everything will be drawn to
@@ -119,7 +96,6 @@ function love.load()
     time = 0
 end
 
--- Resets the game
 function newgame()
     -- Creating the world
     cellSize = 16
@@ -135,31 +111,33 @@ function newgame()
     started = false
     over = false
 
-    --Showing & hiding the appropriate text
     text.newgame:setPosition(0, lg.getHeight() - 300)
     text.gameover:setPosition(0, -100)
     text.score:setPosition(0, lg.getHeight() * 0.87)
     text.score:set("0")
+
+
 end
 
--- Starts the game
 function start()
     started = true
     text.newgame:setPosition(0, lg.getHeight() + 100)
     text.shadertip:setPosition(-600, 12)
     smoof:new(control, {blur = 0}, 0.001)
+
+--  function smoof:new(object, target, smoof_value, completion_threshold, bind, callback)
+
 end
 
--- Ends the game
 function gameover()
     over = true
     smoof:new(control, {blur = 2}, 0.001)
     text.gameover:setPosition(0, 100)
     text.score:set(score)
     text.score:setPosition(0, lg.getHeight() - 200)
+
 end
 
--- Called when the snake hits a food
 function eat()
     score = score + 1
     text.score:set(score)
@@ -169,9 +147,8 @@ end
 function love.update(dt)
     smoof:update(dt)
 
-    post:setMacro("blur", control.blur) -- Setting the "blur" macro
+    post:setMacro("blur", control.blur)
 
-    -- Little timer loop that controls how fast the snake moves
     if started and not over then
         tick = tick + dt
         if tick > (1 / player.speed) then
@@ -182,20 +159,22 @@ function love.update(dt)
 end
 
 function love.draw()
-    -- Setting the blend mode to "alpha" because its set to add below for the bloom
     lg.setBlendMode("alpha")
-
-    -- Drawing the game to the canvas
     canvas:drawTo(function()
         world:draw(cellSize, 0)
+        
+
+        -- lg.setFont(font.large)
+        -- lg.setColor(world.colors[3])
+        -- lg.printf(score, 0, lg.getHeight() * 0.87, lg.getWidth(), "center")
+
     end, true)
 
     lg.setColor(1, 1, 1, 1)
     if useShaders then
-        -- Drawing the canvas to the screen, With the "post" chain
         canvas:draw(post)
         
-        -- Drawing the canvas again, But with the "add" blend mode & "bloom" chain to achieve the bloom effect
+        -- Bloom pass
         lg.setColor(1, 1, 1, 0.7)
         lg.setBlendMode("add")
         canvas:draw(bloom)
@@ -203,27 +182,29 @@ function love.draw()
         canvas:draw()
     end
 
-    -- Drawing the text
     for i,v in pairs(text) do
         v:draw()
     end
+
+    
+
+    --lg.setFont(font.small)
+    --lg.setColor(1, 0, 1)
+    --lg.print(love.timer.getFPS(), 12, 12)
 end
 
 function love.keypressed(key)
-    -- Starting the game if any key is pressed except "1" if its not started yet.
     if not started and key ~= "1" then
         start()
     end
 
-    -- Restarting the game if any key is pressed except "1"
     if over and key ~= "1"  then
         newgame()
     end
 
-    if key == "escape" then love.event.push("quit") end -- Exit with escape
-    if key == "1" then useShaders = not useShaders end -- Toggle shaders with "1"
+    if key == "escape" then love.event.push("quit") end
+    if key == "1" then useShaders = not useShaders end
 
-    -- Controlling the snakes direction
     if key == "left" then
         if player.direction ~= 2 and not player.directionChanged then
             player.direction = 1

@@ -1,5 +1,6 @@
 -- POSTER: A library for applying post processing effects via shaders to your löve game.
--- Version: v0.3
+-- Version: 0.3a built off v0.3
+-- Modified by source kitty
 
 -- MIT License
 -- 
@@ -318,6 +319,21 @@ function poster:draw(...)
 
     -- Drawing the final shader
     lg.draw(final or self.main)
+end
+
+function poster:resize() --Resizing the canvas for a new resolution
+    local w = lg.getWidth()
+    local h = lg.getHeight()
+    self.width = w
+    self.height = h
+    self.main = lg.newCanvas(w, h)
+    self.a = lg.newCanvas(w, h)
+    self.b = lg.newCanvas(w, h)
+    local imageSize = {lg.getWidth(), lg.getHeight()}
+    for _,shader in pairs(poster.shaders_with_imageSize) do
+        poster.loaded_shaders[shader]:send("imageSize", imageSize)
+    end
+    poster:sendImageSize()
 end
 
 return poster
